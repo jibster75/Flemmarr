@@ -70,19 +70,15 @@ If you cannot find how to change a specific part of the configuration in this fi
 
 Once you've found the solution, please add it to the example config file so others can benefit from your knowledge.
 
-## Contributing
+## Developers
+Use Make:
 
-I created Flemmarr because I was shocked when I couldn't find a way to write configuration as code for any of the -arr applications. I hope it is useful to more.
+```
+# To install dependencies and regenerate models:
+make
 
-I do not actually use any of the -arr apps in my daily life, I was just helping a friend to install them. So I don't plan on spending too much time on maintaining or improving the project. Feel free to submit your issues and your suggestions though! And feel free to have a look at the (very simple) code and documentation and try to make them better.
-
-### Some ideas I have
-
-- [ ] document more of the configuration's possible values, required fields
-- [ ] make the service idempotent (not easy considering how the APIs are designed)
-- [ ] make it possible to declare a common config for several apps to avoid redundancy in the file (maybe with group configs)
-- [ ] add automated testing
-- [ ] repackage the Python script as an Ansible package (if there is demand)
+# To run
+```
 
 ## Credits
 
