@@ -1,1 +1,4 @@
 __pycache__/
+/config/config.yml
+src/dev/schema/
+poetry.lock
