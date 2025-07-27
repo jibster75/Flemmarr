@@ -1,5 +1,9 @@
 import requests
 from urllib3.util import Retry
+from flemmarr.logger import setup_logging
+
+logger = setup_logging(__name__)
+logger.debug(f"Logger initialized for {__name__} module")
 
 class Api(object):
 
@@ -28,7 +32,7 @@ class Api(object):
         else:
             id_string = ''
 
-        print('Fetching {}{}: {}'.format(resource, id_string, status_code))
+        logger.info('Fetching {}{}: {}'.format(resource, id_string, status_code))
 
         if status_code < 300:
             return response.json()
@@ -38,10 +42,10 @@ class Api(object):
         status_code = response.status_code
 
         if status_code < 300:
-            print('Creating {} {}: {}'.format(resource, response.json()['id'], status_code))
+            logger.info('Creating {} {}: {}'.format(resource, response.json()['id'], status_code))
             return response.json()
         else:
-            print('Creating {}: {}'.format(resource, status_code))
+            logger.info('Creating {}: {}'.format(resource, status_code))
 
     def __edit(self, resource, body, id=None):
         old_version = self.__get(resource, id)
@@ -56,12 +60,12 @@ class Api(object):
         else:
             id_string = ''
 
-        print('Editing {}{}: {}'.format(resource, id_string, status_code))
+        logger.info('Editing {}{}: {}'.format(resource, id_string, status_code))
 
     def __delete(self, resource, id):
         status_code = self.r.delete(self.__url(resource, id)).status_code
 
-        print('Deleting {} {}: {}'.format(resource, id, status_code))
+        logger.info('Deleting {} {}: {}'.format(resource, id, status_code))
 
     def __triage_and_apply(self, object, resource=''):
         if isinstance(object, dict):
@@ -85,7 +89,7 @@ class Api(object):
         self.path = api_root
         self.r.headers.update({'X-Api-Key': api_key})
 
-        print('Successfully connected to the server and fetched the API key and path')
+        logger.info('Successfully connected to the server and fetched the API key and path')
 
     def apply(self, config):
         self.__triage_and_apply(config)
