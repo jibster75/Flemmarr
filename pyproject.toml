@@ -1,0 +1,29 @@
+[project]
+name = "flemmarr"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "jibster75"}
+]
+readme = "README.md"
+# Python 4 not supported for openapi-python-client yet
+requires-python = ">=3.13, <4.0"
+dependencies = [
+    "pyyaml (>=6.0.2,<7.0.0)",
+    "requests (>=2.32.4,<3.0.0)",
+    "urllib3 (>=2.5.0,<3.0.0)",
+]
+packages = [{ include = "flemmarr", from = "src" }, { include = "dev" }]
+
+[tool.poetry.group.dev.dependencies]
+black = "^25.1.0"
+isort = "^6.0.1"
+mypy = "^1.17.0"
+ruff = "^0.12.5"
+datamodel-code-generator = "^0.32.0"
+pydantic = "^2.11.7"
+openapi-python-client = "^0.25.2"
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
