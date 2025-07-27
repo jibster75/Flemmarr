@@ -1,0 +1,11 @@
+indexer:
+- name: MyIndexer
+  fields:
+  - name: url
+    value: https://example.com
+  - name: apiKey
+    value: myapikey
+  implementation: Torznab
+  configContract: torznabSettings
+  enableRss: true
+  enableAutomaticSearch: true
