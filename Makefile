@@ -21,3 +21,16 @@ run_debug:
 format:
 	poetry run black src/flemmarr
 	poetry run isort src/flemmarr
+
+sonarr_docker_up:
+	docker-compose -f src/dev/docker/sonarr-docker-compose.yaml up -d
+
+sonarr_docker_down: 
+	docker-compose -f src/dev/docker/sonarr-docker-compose.yaml down 
+
+dev_up:
+	poetry run python src/dev/scripts/setup_sonarr_dev.py
+	$(MAKE) sonarr_docker_up
+
+dev_down:
+	$(MAKE) sonarr_docker_down

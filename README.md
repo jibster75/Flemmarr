@@ -71,6 +71,11 @@ If you cannot find how to change a specific part of the configuration in this fi
 Once you've found the solution, please add it to the example config file so others can benefit from your knowledge.
 
 ## Developers
+Requirements:
+- docker-compose
+- make
+- poetry
+
 Use Make:
 
 ```
