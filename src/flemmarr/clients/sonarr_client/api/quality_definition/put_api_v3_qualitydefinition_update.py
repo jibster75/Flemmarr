@@ -22,7 +22,6 @@ def _get_kwargs(
 
     _kwargs["json"] = []
     for body_item_data in body:
-        print(f"Body Item Data: {body_item_data}")
         body_item = body_item_data.to_dict()
         _kwargs["json"].append(body_item)
 
