@@ -1,10 +1,10 @@
 from flemmarr.clients.sonarr_client import AuthenticatedClient
 from flemmarr.logger import setup_logging
 from flemmarr.clients.sonarr_client.api.api_info import get_api
-from flemmarr.clients.sonarr_client.types import Response
+from flemmarr.clients.sonarr_client.types import Response, Unset
 import requests
 from urllib3.util import Retry
-from flemmarr.sonarr.sonarr_config_map import config_key_to_args
+from flemmarr.sonarr.sonarr_config_map import config_key_to_args, merge, bulk
 
 logger = setup_logging(__name__)
 logger.debug(f"Logger initialized for {__name__} module")
@@ -54,10 +54,35 @@ class SonarrConfigHandler(object):
 
         logger.info("Successfully connected to the server and fetched the API key")
 
-    def get_desired_config(self, desired_raw_config, model):
+    def convert_to_list(self, object):
+        # Check if list
+        if not isinstance(object, list):
+            object = [object]
+
+        return object
+
+    def get_desired_config(
+        self,
+        desired_raw_config,
+        model,
+    ):
+        desired_raw_config = self.convert_to_list(desired_raw_config)
+
         desired_config = [model().from_dict(config) for config in desired_raw_config]
 
         return desired_config
+
+    def merge_desired_config_with_desired(
+        self,
+        desired_raw_config,
+        derived_config,
+    ):
+        derived_raw_config = derived_config.to_dict()
+        derived_raw_config.update(desired_raw_config)
+        derived_config = derived_config.from_dict(derived_raw_config)
+        derived_config = self.convert_to_list(derived_config)
+
+        return derived_config
 
     def get_derived_config(self, derived_config_api):
         logger.debug(f"Derived API provided: {derived_config_api.__name__}")
@@ -85,14 +110,24 @@ class SonarrConfigHandler(object):
                 f"Error while deleting {id} via {delete_api.__name__}. \nStatus code: {response.status_code}\nContent: {response.content}"
             )
 
-    def apply_desired_config(self, desired_config, apply_api):
+    def apply_desired_config(self, desired_config, apply_api, strategy):
+        if strategy == bulk:
+            apply_api.sync_detailed(client=self.client, body=desired_config)
+            logger.debug(f"Desired Config: {desired_config}")
         for config in desired_config:
-            apply_api.sync(client=self.client, body=config)
+            kwargs = {}
+            id = getattr(config, "id", None)
+            if id:
+                kwargs["id"] = id
+                logger.debug(f"ID for config apply request: {id}")
+
+            apply_api.sync_detailed(client=self.client, body=config, **kwargs)
 
     def handle_config_base(
         self,
         desired_raw_config,
         config_key,
+        strategy=None,
         model=None,
         get_api=None,
         delete_api=None,
@@ -105,22 +140,30 @@ class SonarrConfigHandler(object):
             return
         # If additional kwargs are passed, recurse
         if kwargs:
-            logger.debug(f"kwargs: {kwargs}")
             for config_key, value in kwargs.items():
-                logger.debug(f"Config Key: {config_key} Value: {value}")
+                logger.debug(f"Config Key: {config_key}\nValue: {value}")
                 self.handle_config_base(
                     desired_raw_config=desired_raw_config,
                     config_key=config_key,
                     **value,
                 )
-        # Make sure desired raw config is a list
-        if not isinstance(desired_raw_config, list):
-            desired_raw_config = [desired_raw_config]
-        desired_config = self.get_desired_config(desired_raw_config, model=model)
+            return
+
         derived_config = self.get_derived_config(get_api)
+
+        if strategy == merge:
+            desired_config = self.merge_desired_config_with_desired(
+                desired_raw_config=desired_raw_config,
+                derived_config=derived_config,
+            )
+        else:
+            desired_config = self.get_desired_config(
+                desired_raw_config,
+                model=model,
+            )
         if delete_api:
             self.delete_configs(derived_config, delete_api)
-        self.apply_desired_config(desired_config, create_api)
+        self.apply_desired_config(desired_config, create_api, strategy)
 
     def apply(self, desired_raw_config):
         for config_key, value in config_key_to_args.items():
