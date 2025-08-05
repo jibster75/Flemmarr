@@ -11,10 +11,7 @@ from ...types import Response
 
 def _get_kwargs(
     *,
-    body: Union[
-        list["SeriesResource"],
-        list["SeriesResource"],
-    ],
+    body: list["SeriesResource"],
 ) -> dict[str, Any]:
     headers: dict[str, Any] = {}
 
@@ -23,20 +20,12 @@ def _get_kwargs(
         "url": "/api/v3/series/import",
     }
 
-    if isinstance(body, list["SeriesResource"]):
-        _kwargs["json"] = []
-        for body_item_data in body:
-            body_item = body_item_data.to_dict()
-            _kwargs["json"].append(body_item)
+    _kwargs["json"] = []
+    for body_item_data in body:
+        body_item = body_item_data.to_dict()
+        _kwargs["json"].append(body_item)
 
-        headers["Content-Type"] = "application/json"
-    if isinstance(body, list["SeriesResource"]):
-        _kwargs["json"] = []
-        for body_item_data in body:
-            body_item = body_item_data.to_dict()
-            _kwargs["json"].append(body_item)
-
-        headers["Content-Type"] = "application/*+json"
+    headers["Content-Type"] = "application/json"
 
     _kwargs["headers"] = headers
     return _kwargs
@@ -63,14 +52,10 @@ def _build_response(*, client: Union[AuthenticatedClient, Client], response: htt
 def sync_detailed(
     *,
     client: Union[AuthenticatedClient, Client],
-    body: Union[
-        list["SeriesResource"],
-        list["SeriesResource"],
-    ],
+    body: list["SeriesResource"],
 ) -> Response[Any]:
     """
     Args:
-        body (list['SeriesResource']):
         body (list['SeriesResource']):
 
     Raises:
@@ -95,14 +80,10 @@ def sync_detailed(
 async def asyncio_detailed(
     *,
     client: Union[AuthenticatedClient, Client],
-    body: Union[
-        list["SeriesResource"],
-        list["SeriesResource"],
-    ],
+    body: list["SeriesResource"],
 ) -> Response[Any]:
     """
     Args:
-        body (list['SeriesResource']):
         body (list['SeriesResource']):
 
     Raises:

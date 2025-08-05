@@ -11,10 +11,7 @@ from ...types import Response
 
 def _get_kwargs(
     *,
-    body: Union[
-        ImportListExclusionBulkResource,
-        ImportListExclusionBulkResource,
-    ],
+    body: ImportListExclusionBulkResource,
 ) -> dict[str, Any]:
     headers: dict[str, Any] = {}
 
@@ -23,14 +20,9 @@ def _get_kwargs(
         "url": "/api/v3/importlistexclusion/bulk",
     }
 
-    if isinstance(body, ImportListExclusionBulkResource):
-        _kwargs["json"] = body.to_dict()
+    _kwargs["json"] = body.to_dict()
 
-        headers["Content-Type"] = "application/json"
-    if isinstance(body, ImportListExclusionBulkResource):
-        _kwargs["json"] = body.to_dict()
-
-        headers["Content-Type"] = "application/*+json"
+    headers["Content-Type"] = "application/json"
 
     _kwargs["headers"] = headers
     return _kwargs
@@ -57,14 +49,10 @@ def _build_response(*, client: Union[AuthenticatedClient, Client], response: htt
 def sync_detailed(
     *,
     client: Union[AuthenticatedClient, Client],
-    body: Union[
-        ImportListExclusionBulkResource,
-        ImportListExclusionBulkResource,
-    ],
+    body: ImportListExclusionBulkResource,
 ) -> Response[Any]:
     """
     Args:
-        body (ImportListExclusionBulkResource):
         body (ImportListExclusionBulkResource):
 
     Raises:
@@ -89,14 +77,10 @@ def sync_detailed(
 async def asyncio_detailed(
     *,
     client: Union[AuthenticatedClient, Client],
-    body: Union[
-        ImportListExclusionBulkResource,
-        ImportListExclusionBulkResource,
-    ],
+    body: ImportListExclusionBulkResource,
 ) -> Response[Any]:
     """
     Args:
-        body (ImportListExclusionBulkResource):
         body (ImportListExclusionBulkResource):
 
     Raises:

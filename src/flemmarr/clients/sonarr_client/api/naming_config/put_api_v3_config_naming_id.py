@@ -12,10 +12,7 @@ from ...types import Response
 def _get_kwargs(
     id: str,
     *,
-    body: Union[
-        NamingConfigResource,
-        NamingConfigResource,
-    ],
+    body: NamingConfigResource,
 ) -> dict[str, Any]:
     headers: dict[str, Any] = {}
 
@@ -24,14 +21,9 @@ def _get_kwargs(
         "url": f"/api/v3/config/naming/{id}",
     }
 
-    if isinstance(body, NamingConfigResource):
-        _kwargs["json"] = body.to_dict()
+    _kwargs["json"] = body.to_dict()
 
-        headers["Content-Type"] = "application/json"
-    if isinstance(body, NamingConfigResource):
-        _kwargs["json"] = body.to_dict()
-
-        headers["Content-Type"] = "application/*+json"
+    headers["Content-Type"] = "application/json"
 
     _kwargs["headers"] = headers
     return _kwargs
@@ -65,15 +57,11 @@ def sync_detailed(
     id: str,
     *,
     client: Union[AuthenticatedClient, Client],
-    body: Union[
-        NamingConfigResource,
-        NamingConfigResource,
-    ],
+    body: NamingConfigResource,
 ) -> Response[NamingConfigResource]:
     """
     Args:
         id (str):
-        body (NamingConfigResource):
         body (NamingConfigResource):
 
     Raises:
@@ -100,15 +88,11 @@ def sync(
     id: str,
     *,
     client: Union[AuthenticatedClient, Client],
-    body: Union[
-        NamingConfigResource,
-        NamingConfigResource,
-    ],
+    body: NamingConfigResource,
 ) -> Optional[NamingConfigResource]:
     """
     Args:
         id (str):
-        body (NamingConfigResource):
         body (NamingConfigResource):
 
     Raises:
@@ -130,15 +114,11 @@ async def asyncio_detailed(
     id: str,
     *,
     client: Union[AuthenticatedClient, Client],
-    body: Union[
-        NamingConfigResource,
-        NamingConfigResource,
-    ],
+    body: NamingConfigResource,
 ) -> Response[NamingConfigResource]:
     """
     Args:
         id (str):
-        body (NamingConfigResource):
         body (NamingConfigResource):
 
     Raises:
@@ -163,15 +143,11 @@ async def asyncio(
     id: str,
     *,
     client: Union[AuthenticatedClient, Client],
-    body: Union[
-        NamingConfigResource,
-        NamingConfigResource,
-    ],
+    body: NamingConfigResource,
 ) -> Optional[NamingConfigResource]:
     """
     Args:
         id (str):
-        body (NamingConfigResource):
         body (NamingConfigResource):
 
     Raises:

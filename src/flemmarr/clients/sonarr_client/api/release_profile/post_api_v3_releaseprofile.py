@@ -11,10 +11,7 @@ from ...types import Response
 
 def _get_kwargs(
     *,
-    body: Union[
-        ReleaseProfileResource,
-        ReleaseProfileResource,
-    ],
+    body: ReleaseProfileResource,
 ) -> dict[str, Any]:
     headers: dict[str, Any] = {}
 
@@ -23,14 +20,9 @@ def _get_kwargs(
         "url": "/api/v3/releaseprofile",
     }
 
-    if isinstance(body, ReleaseProfileResource):
-        _kwargs["json"] = body.to_dict()
+    _kwargs["json"] = body.to_dict()
 
-        headers["Content-Type"] = "application/json"
-    if isinstance(body, ReleaseProfileResource):
-        _kwargs["json"] = body.to_dict()
-
-        headers["Content-Type"] = "application/*+json"
+    headers["Content-Type"] = "application/json"
 
     _kwargs["headers"] = headers
     return _kwargs
@@ -63,14 +55,10 @@ def _build_response(
 def sync_detailed(
     *,
     client: Union[AuthenticatedClient, Client],
-    body: Union[
-        ReleaseProfileResource,
-        ReleaseProfileResource,
-    ],
+    body: ReleaseProfileResource,
 ) -> Response[ReleaseProfileResource]:
     """
     Args:
-        body (ReleaseProfileResource):
         body (ReleaseProfileResource):
 
     Raises:
@@ -95,14 +83,10 @@ def sync_detailed(
 def sync(
     *,
     client: Union[AuthenticatedClient, Client],
-    body: Union[
-        ReleaseProfileResource,
-        ReleaseProfileResource,
-    ],
+    body: ReleaseProfileResource,
 ) -> Optional[ReleaseProfileResource]:
     """
     Args:
-        body (ReleaseProfileResource):
         body (ReleaseProfileResource):
 
     Raises:
@@ -122,14 +106,10 @@ def sync(
 async def asyncio_detailed(
     *,
     client: Union[AuthenticatedClient, Client],
-    body: Union[
-        ReleaseProfileResource,
-        ReleaseProfileResource,
-    ],
+    body: ReleaseProfileResource,
 ) -> Response[ReleaseProfileResource]:
     """
     Args:
-        body (ReleaseProfileResource):
         body (ReleaseProfileResource):
 
     Raises:
@@ -152,14 +132,10 @@ async def asyncio_detailed(
 async def asyncio(
     *,
     client: Union[AuthenticatedClient, Client],
-    body: Union[
-        ReleaseProfileResource,
-        ReleaseProfileResource,
-    ],
+    body: ReleaseProfileResource,
 ) -> Optional[ReleaseProfileResource]:
     """
     Args:
-        body (ReleaseProfileResource):
         body (ReleaseProfileResource):
 
     Raises:

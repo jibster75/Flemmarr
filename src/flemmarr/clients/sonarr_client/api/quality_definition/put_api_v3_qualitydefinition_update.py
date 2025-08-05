@@ -11,10 +11,7 @@ from ...types import Response
 
 def _get_kwargs(
     *,
-    body: Union[
-        list["QualityDefinitionResource"],
-        list["QualityDefinitionResource"],
-    ],
+    body: list["QualityDefinitionResource"],
 ) -> dict[str, Any]:
     headers: dict[str, Any] = {}
 
@@ -23,20 +20,13 @@ def _get_kwargs(
         "url": "/api/v3/qualitydefinition/update",
     }
 
-    if isinstance(body, list["QualityDefinitionResource"]):
-        _kwargs["json"] = []
-        for body_item_data in body:
-            body_item = body_item_data.to_dict()
-            _kwargs["json"].append(body_item)
+    _kwargs["json"] = []
+    for body_item_data in body:
+        print(f"Body Item Data: {body_item_data}")
+        body_item = body_item_data.to_dict()
+        _kwargs["json"].append(body_item)
 
-        headers["Content-Type"] = "application/json"
-    if isinstance(body, list["QualityDefinitionResource"]):
-        _kwargs["json"] = []
-        for body_item_data in body:
-            body_item = body_item_data.to_dict()
-            _kwargs["json"].append(body_item)
-
-        headers["Content-Type"] = "application/*+json"
+    headers["Content-Type"] = "application/json"
 
     _kwargs["headers"] = headers
     return _kwargs
@@ -63,14 +53,10 @@ def _build_response(*, client: Union[AuthenticatedClient, Client], response: htt
 def sync_detailed(
     *,
     client: Union[AuthenticatedClient, Client],
-    body: Union[
-        list["QualityDefinitionResource"],
-        list["QualityDefinitionResource"],
-    ],
+    body: list["QualityDefinitionResource"],
 ) -> Response[Any]:
     """
     Args:
-        body (list['QualityDefinitionResource']):
         body (list['QualityDefinitionResource']):
 
     Raises:
@@ -95,14 +81,10 @@ def sync_detailed(
 async def asyncio_detailed(
     *,
     client: Union[AuthenticatedClient, Client],
-    body: Union[
-        list["QualityDefinitionResource"],
-        list["QualityDefinitionResource"],
-    ],
+    body: list["QualityDefinitionResource"],
 ) -> Response[Any]:
     """
     Args:
-        body (list['QualityDefinitionResource']):
         body (list['QualityDefinitionResource']):
 
     Raises:

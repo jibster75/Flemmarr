@@ -24,7 +24,11 @@ def write_config():
     config = {
         "package_name_override": "sonarr_client",
         "project_name_override": "sonarr-client",
-        "content_type_overrides": {"text/plain": "application/json"},
+        "content_type_overrides": {
+            "text/plain": "application/json",
+            "application/*+json": "",
+            "text/json": "",
+        },
     }
     SONARR_CLIENT_CONFIG_PATH.write_text(json.dumps(config, indent=2))
     print(f"✅ Config written to {SONARR_CLIENT_CONFIG_PATH}")

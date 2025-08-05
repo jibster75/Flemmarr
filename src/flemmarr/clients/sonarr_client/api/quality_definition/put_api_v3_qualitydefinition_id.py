@@ -12,10 +12,7 @@ from ...types import Response
 def _get_kwargs(
     id: str,
     *,
-    body: Union[
-        QualityDefinitionResource,
-        QualityDefinitionResource,
-    ],
+    body: QualityDefinitionResource,
 ) -> dict[str, Any]:
     headers: dict[str, Any] = {}
 
@@ -24,14 +21,9 @@ def _get_kwargs(
         "url": f"/api/v3/qualitydefinition/{id}",
     }
 
-    if isinstance(body, QualityDefinitionResource):
-        _kwargs["json"] = body.to_dict()
+    _kwargs["json"] = body.to_dict()
 
-        headers["Content-Type"] = "application/json"
-    if isinstance(body, QualityDefinitionResource):
-        _kwargs["json"] = body.to_dict()
-
-        headers["Content-Type"] = "application/*+json"
+    headers["Content-Type"] = "application/json"
 
     _kwargs["headers"] = headers
     return _kwargs
@@ -65,15 +57,11 @@ def sync_detailed(
     id: str,
     *,
     client: Union[AuthenticatedClient, Client],
-    body: Union[
-        QualityDefinitionResource,
-        QualityDefinitionResource,
-    ],
+    body: QualityDefinitionResource,
 ) -> Response[QualityDefinitionResource]:
     """
     Args:
         id (str):
-        body (QualityDefinitionResource):
         body (QualityDefinitionResource):
 
     Raises:
@@ -100,15 +88,11 @@ def sync(
     id: str,
     *,
     client: Union[AuthenticatedClient, Client],
-    body: Union[
-        QualityDefinitionResource,
-        QualityDefinitionResource,
-    ],
+    body: QualityDefinitionResource,
 ) -> Optional[QualityDefinitionResource]:
     """
     Args:
         id (str):
-        body (QualityDefinitionResource):
         body (QualityDefinitionResource):
 
     Raises:
@@ -130,15 +114,11 @@ async def asyncio_detailed(
     id: str,
     *,
     client: Union[AuthenticatedClient, Client],
-    body: Union[
-        QualityDefinitionResource,
-        QualityDefinitionResource,
-    ],
+    body: QualityDefinitionResource,
 ) -> Response[QualityDefinitionResource]:
     """
     Args:
         id (str):
-        body (QualityDefinitionResource):
         body (QualityDefinitionResource):
 
     Raises:
@@ -163,15 +143,11 @@ async def asyncio(
     id: str,
     *,
     client: Union[AuthenticatedClient, Client],
-    body: Union[
-        QualityDefinitionResource,
-        QualityDefinitionResource,
-    ],
+    body: QualityDefinitionResource,
 ) -> Optional[QualityDefinitionResource]:
     """
     Args:
         id (str):
-        body (QualityDefinitionResource):
         body (QualityDefinitionResource):
 
     Raises:

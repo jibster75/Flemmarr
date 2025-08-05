@@ -114,6 +114,7 @@ class SonarrConfigHandler(object):
         if strategy == bulk:
             apply_api.sync_detailed(client=self.client, body=desired_config)
             logger.debug(f"Desired Config: {desired_config}")
+            return
         for config in desired_config:
             kwargs = {}
             id = getattr(config, "id", None)

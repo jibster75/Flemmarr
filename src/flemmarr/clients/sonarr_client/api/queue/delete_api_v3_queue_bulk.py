@@ -11,10 +11,7 @@ from ...types import UNSET, Response, Unset
 
 def _get_kwargs(
     *,
-    body: Union[
-        QueueBulkResource,
-        QueueBulkResource,
-    ],
+    body: QueueBulkResource,
     remove_from_client: Union[Unset, bool] = True,
     blocklist: Union[Unset, bool] = False,
     skip_redownload: Union[Unset, bool] = False,
@@ -40,14 +37,9 @@ def _get_kwargs(
         "params": params,
     }
 
-    if isinstance(body, QueueBulkResource):
-        _kwargs["json"] = body.to_dict()
+    _kwargs["json"] = body.to_dict()
 
-        headers["Content-Type"] = "application/json"
-    if isinstance(body, QueueBulkResource):
-        _kwargs["json"] = body.to_dict()
-
-        headers["Content-Type"] = "application/*+json"
+    headers["Content-Type"] = "application/json"
 
     _kwargs["headers"] = headers
     return _kwargs
@@ -74,10 +66,7 @@ def _build_response(*, client: Union[AuthenticatedClient, Client], response: htt
 def sync_detailed(
     *,
     client: Union[AuthenticatedClient, Client],
-    body: Union[
-        QueueBulkResource,
-        QueueBulkResource,
-    ],
+    body: QueueBulkResource,
     remove_from_client: Union[Unset, bool] = True,
     blocklist: Union[Unset, bool] = False,
     skip_redownload: Union[Unset, bool] = False,
@@ -89,7 +78,6 @@ def sync_detailed(
         blocklist (Union[Unset, bool]):  Default: False.
         skip_redownload (Union[Unset, bool]):  Default: False.
         change_category (Union[Unset, bool]):  Default: False.
-        body (QueueBulkResource):
         body (QueueBulkResource):
 
     Raises:
@@ -118,10 +106,7 @@ def sync_detailed(
 async def asyncio_detailed(
     *,
     client: Union[AuthenticatedClient, Client],
-    body: Union[
-        QueueBulkResource,
-        QueueBulkResource,
-    ],
+    body: QueueBulkResource,
     remove_from_client: Union[Unset, bool] = True,
     blocklist: Union[Unset, bool] = False,
     skip_redownload: Union[Unset, bool] = False,
@@ -133,7 +118,6 @@ async def asyncio_detailed(
         blocklist (Union[Unset, bool]):  Default: False.
         skip_redownload (Union[Unset, bool]):  Default: False.
         change_category (Union[Unset, bool]):  Default: False.
-        body (QueueBulkResource):
         body (QueueBulkResource):
 
     Raises:
