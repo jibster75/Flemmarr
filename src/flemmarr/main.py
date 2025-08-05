@@ -1,6 +1,6 @@
 import yaml
 from flemmarr.logger import setup_logging
-from flemmarr.sonarr_handler import SonarrConfigHandler
+from sonarr.sonarr_handler import SonarrConfigHandler
 
 logger = setup_logging(__name__)
 logger.debug(f"Logger initialized for {__name__} module")

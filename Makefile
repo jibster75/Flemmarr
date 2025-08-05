@@ -29,6 +29,7 @@ sonarr_docker_down:
 	docker-compose -f src/dev/docker/sonarr-docker-compose.yaml down 
 
 dev_up:
+	$(MAKE) install
 	poetry run python src/dev/scripts/setup_sonarr_dev.py
 	$(MAKE) sonarr_docker_up
 

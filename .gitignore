@@ -4,3 +4,4 @@ src/dev/schema/
 src/dev/openapi-python-client-config/
 src/dev/docker
 poetry.lock
+.vscode

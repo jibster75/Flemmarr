@@ -58,7 +58,6 @@ def setup_directories(config_dir, data_dir):
 
 def write_docker_compose_file(config_dir, data_dir, docker_compose_path):
     compose_config = {
-        "version": "3.9",
         "services": {
             "sonarr": {
                 "image": "linuxserver/sonarr",
