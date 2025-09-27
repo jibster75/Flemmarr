@@ -2,19 +2,28 @@ import yaml
 import secrets
 import string
 from pathlib import Path
-from xml.etree.ElementTree import Element, SubElement, ElementTree, tostring
+from xml.etree.ElementTree import Element, SubElement, tostring
 from xml.dom import minidom
-from dev.utils.constants import SONARR_DEV_CONFIG_DIR, SONARR_DEV_DATA_DIR, SONARR_DEV_CONFIG_PATH, SONARR_DOCKER_COMPOSE_PATH
+from utils.constants import (
+    SONARR_DEV_CONFIG_DIR,
+    SONARR_DEV_DATA_DIR,
+    SONARR_DEV_CONFIG_PATH,
+    SONARR_DOCKER_COMPOSE_PATH,
+)
 
 
 def generate_api_key(length=32):
-    return ''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(length))
+    return "".join(
+        secrets.choice(string.ascii_letters + string.digits) for _ in range(length)
+    )
+
 
 def prettify_xml(elem):
     """Return a pretty-printed XML string for the Element."""
-    rough_string = tostring(elem, 'utf-8')
+    rough_string = tostring(elem, "utf-8")
     parsed = minidom.parseString(rough_string)
     return parsed.toprettyxml(indent="  ")
+
 
 def write_config_xml(output_path: Path, api_key: str = ""):
     config = Element("Config")
@@ -63,26 +72,25 @@ def write_docker_compose_file(config_dir, data_dir, docker_compose_path):
                 "image": "linuxserver/sonarr",
                 "container_name": "flemmarr_sonarr_dev",
                 "ports": [
-                    "8989:8989"
+                    "8989:8989",
                 ],
                 "environment": [
                     "PUID=1000",
                     "PGID=1000",
-                    "TZ=Etc/UTC"
+                    "TZ=Etc/UTC",
                 ],
                 "volumes": [
                     f"{config_dir.resolve()}:/config",
-                    f"{data_dir.resolve() / "tv"}:/tv",
-                    f"{data_dir.resolve() / "downloads"}:/downloads",
+                    f"{data_dir.resolve() / 'tv'}:/data/media/tv",
+                    f"{data_dir.resolve() / 'downloads'}:/downloads",
                 ],
-
-                "restart": "unless-stopped"
+                "restart": "unless-stopped",
             }
         }
     }
 
     docker_compose_path.parent.mkdir(parents=True, exist_ok=True)
-    with open(docker_compose_path, 'w') as f:
+    with open(docker_compose_path, "w") as f:
         yaml.dump(compose_config, f, default_flow_style=False)
 
     print(f"✅ docker-compose.yml written to {docker_compose_path}")
@@ -92,4 +100,8 @@ if __name__ == "__main__":
     config_dir = setup_directories(SONARR_DEV_CONFIG_DIR, SONARR_DEV_DATA_DIR)
     api_key = generate_api_key()
     write_config_xml(SONARR_DEV_CONFIG_PATH, api_key)
-    write_docker_compose_file(SONARR_DEV_CONFIG_DIR, SONARR_DEV_DATA_DIR, SONARR_DOCKER_COMPOSE_PATH)
+    write_docker_compose_file(
+        SONARR_DEV_CONFIG_DIR,
+        SONARR_DEV_DATA_DIR,
+        SONARR_DOCKER_COMPOSE_PATH,
+    )
