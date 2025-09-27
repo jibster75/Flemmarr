@@ -15,6 +15,9 @@ generate_models:
 run:
 	poetry run python src/flemmarr/main.py
 
+run_retrieve_config:
+	FLEMMARR_RETRIEVE_CONFIG="TRUE" poetry run python src/flemmarr/main.py
+
 run_debug:
 	FLEMMARR_LOG_LEVEL="DEBUG" poetry run python src/flemmarr/main.py
 
