@@ -2,6 +2,7 @@ import logging
 import os
 import sys
 
+
 def setup_logging(name="flemmarr") -> logging.Logger:
     """
     Set up a reusable logger with a consistent format and level.
@@ -29,14 +30,15 @@ def setup_logging(name="flemmarr") -> logging.Logger:
 
         # Define how log messages will appear
         formatter = logging.Formatter(
-            fmt='[%(asctime)s] [%(levelname)s] [%(name)s]: %(message)s',
-            datefmt='%Y-%m-%d %H:%M:%S'
+            fmt="[%(asctime)s] [%(levelname)s] [%(name)s] [%(funcName)25s()]: %(message)s",
+            datefmt="%Y-%m-%d %H:%M:%S",
         )
 
         handler.setFormatter(formatter)
         logger.addHandler(handler)
 
     return logger
+
 
 # Shared default logger used by modules that don't need their own named logger
 logger = setup_logging()
