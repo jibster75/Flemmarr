@@ -1,21 +1,20 @@
-from flemmarr.clients.sonarr_client import AuthenticatedClient
-from flemmarr.logger import setup_logging
-from flemmarr.clients.sonarr_client.api.api_info import get_api as get_api_info
 import requests
-from urllib3.util import Retry
-from flemmarr.sonarr.sonarr_config_map import (
-    single,
-    bulk,
-    api_key_path_suffix,
-    configs,
-    configItem,
-)
-from flemmarr.clients.sonarr_client.errors import UnexpectedStatus
-
 from typing import Any, Union, Dict, List
+from urllib3.util import Retry
 import yaml
-import copy
+
+from flemmarr.logger import setup_logging
+from flemmarr.utils.enum import Strategy
+from flemmarr.utils.constants import api_key_path_suffix
+from utils.models.config import ConfigItem
+
+from flemmarr.sonarr.sonarr_config_map import configs
+
+from flemmarr.clients.sonarr_client import AuthenticatedClient
 from flemmarr.clients.sonarr_client.types import UNSET
+from flemmarr.clients.sonarr_client.errors import UnexpectedStatus
+from flemmarr.clients.sonarr_client.api.api_info import get_api as get_api_info
+
 
 logger = setup_logging(__name__)
 logger.debug(f"Logger initialized for {__name__} module")
@@ -99,7 +98,7 @@ class SonarrConfigHandler:
     def _convert_to_raw_config_map(
         self,
         configs: List[Dict],
-        primary_key: str = "",
+        primary_key: str,
         secondary_level: str = "",
     ):
         """
@@ -109,7 +108,7 @@ class SonarrConfigHandler:
 
         raw_config_map = {}
         for config in configs:
-            key = "default"
+            key = primary_key
             if primary_key in config and config[primary_key]:
                 key = config[primary_key]
 
@@ -280,7 +279,7 @@ class SonarrConfigHandler:
 
     def _process_raw_configs(
         self,
-        config: configItem,
+        config: ConfigItem,
     ):
         """
         Merges desired raw config map into derived raw config map.
@@ -323,18 +322,18 @@ class SonarrConfigHandler:
 
         logger.info("Successfully set up client.")
 
-    def _convert_to_update_modeled_configs(self, config: configItem):
+    def _convert_to_update_modeled_configs(self, config: ConfigItem):
         config.update_modeled_configs = self._convert_to_modeled_configs(
-            model=config.model,
+            model=config.model.resource,
             configs=list(
                 config.merged_raw_config_map.values(),
             ),
         )
         logger.debug(f"Update modeled configs: {config.update_modeled_configs}")
 
-    def _convert_to_new_modeled_configs(self, config: configItem):
+    def _convert_to_new_modeled_configs(self, config: ConfigItem):
         pre_new_modeled_configs = self._convert_to_modeled_configs(
-            model=config.model,
+            model=config.model.resource,
             configs=list(
                 config.new_raw_config_map.values(),
             ),
@@ -346,14 +345,14 @@ class SonarrConfigHandler:
 
     def process_configs(
         self,
-        config: configItem,
+        config: ConfigItem,
     ):
         """
         Uses derived and desired config maps to separate new config and
         exisitng config that is being updated.
         """
         logger.debug(
-            f"Attempting to process derived and desired configs for: {config.model_name}"
+            f"Attempting to process derived and desired configs for: {config.model.name}"
         )
 
         # process raw configs
@@ -364,10 +363,10 @@ class SonarrConfigHandler:
         self._convert_to_new_modeled_configs(config=config)
 
         logger.info(
-            f"Successfully processed derived and desired configs for: {config.model_name}"
+            f"Successfully processed derived and desired configs for: {config.model.name}"
         )
 
-    def get_desired_raw_configs(self, config: configItem, desired_user_configs) -> List:
+    def get_desired_raw_configs(self, config: ConfigItem, desired_user_configs) -> List:
         """
         Takes in full user configs and retrieves only
         the section of config we are currently working on
@@ -388,28 +387,28 @@ class SonarrConfigHandler:
 
         return self._convert_to_list(desired_raw_configs) if desired_raw_configs else []
 
-    def get_derived_config(self, config: configItem) -> List[Any]:
-        if not config.get_api:
-            raise Exception(f"Get API undefined for config: {config.model_name}")
-        if not config.get_api_name:
-            logger.warning(f"Get API Name undefined for config: {config.get_api}")
+    def get_derived_config(self, config: ConfigItem) -> List[Any]:
+        if not config.get.api:
+            raise Exception(f"Get API undefined for config: {config.model.name}")
+        if not config.get.name:
+            logger.warning(f"Get API Name undefined for config: {config.get.api}")
 
         logger.debug(
-            f"Attempting to retrieve derived config using the following api: {config.get_api_name}"
+            f"Attempting to retrieve derived config using the following api: {config.get.name}"
         )
 
-        derived_config = self._handle_api_call(api=config.get_api)
+        derived_config = self._handle_api_call(api=config.get.api)
         logger.info(
-            f"Successfully retrieved derived config using the following api: {config.get_api_name}"
+            f"Successfully retrieved derived config using the following api: {config.get.name}"
         )
 
         return self._convert_to_list(derived_config)
 
-    def delete_existing_configs(self, config: configItem):
+    def delete_existing_configs(self, config: ConfigItem):
         # If we're using the create api, we should delete config to avoid conflicts
-        if not config.delete_api:
+        if not config.delete.api:
             logger.info(
-                f"No delete api specified for: {config.model_name} skipping delete.."
+                f"No delete api specified for: {config.model.name} skipping delete.."
             )
             return
 
@@ -419,50 +418,50 @@ class SonarrConfigHandler:
         config_ids = self._get_config_ids(config.derived_modeled_configs)
         for id in config_ids:
             delete_config_args["id"] = id
-            logger.debug(f"Attempting to delete id: {id} via {config.delete_api_name}")
-            self._handle_api_call(api=config.delete_api, api_args=delete_config_args)
-            logger.info(f"Successfully deleted id: {id} via {config.delete_api_name}")
+            logger.debug(f"Attempting to delete id: {id} via {config.delete.name}")
+            self._handle_api_call(api=config.delete.api, api_args=delete_config_args)
+            logger.info(f"Successfully deleted id: {id} via {config.delete.name}")
 
-    def _apply_new_config_single(self, config: configItem):
-        if not (config.create_strategy == single):
+    def _apply_new_config_single(self, config: ConfigItem):
+        if not (config.create.strategy == Strategy.SINGLE):
             return
         logger.debug(
-            f"Attempting to apply new config using the following api: {config.create_api_name}"
+            f"Attempting to apply new config using the following api: {config.create.name}"
         )
         args: Dict[str, Any] = {
             "client": self.client,
         }
         for new_modeled_config in config.new_modeled_configs:
             args["body"] = new_modeled_config
-            self._handle_api_call(api=config.create_api, api_args=args)
+            self._handle_api_call(api=config.create.api, api_args=args)
         logger.info(
-            f"Successfully applied new config using the following api: {config.create_api_name}"
+            f"Successfully applied new config using the following api: {config.create.name}"
         )
 
-    def _apply_new_config_bulk(self, config: configItem):
-        if not (config.create_strategy == bulk):
+    def _apply_new_config_bulk(self, config: ConfigItem):
+        if not (config.create.strategy == Strategy.BULK):
             return
         logger.debug(
-            f"Attempting to apply new config using the following bulk api: {config.create_api_name}"
+            f"Attempting to apply new config using the following bulk api: {config.create.name}"
         )
         args: Dict[str, Any] = {
             "client": self.client,
             "body": config.new_modeled_configs,
         }
-        self._handle_api_call(api=config.create_api, api_args=args)
+        self._handle_api_call(api=config.create.api, api_args=args)
         logger.info(
-            f"Successfully applied new config using the following bulk api: {config.create_api_name}"
+            f"Successfully applied new config using the following bulk api: {config.create.name}"
         )
 
-    def _apply_update_config_single(self, config: configItem):
+    def _apply_update_config_single(self, config: ConfigItem):
         if not (
             config.update_modeled_configs
-            and config.update_strategy == single
-            and config.update_api_single
+            and config.update.strategy == Strategy.SINGLE
+            and config.update.api
         ):
             return
         logger.debug(
-            f"Attempting to update config using the following api: {config.update_api_single_name}"
+            f"Attempting to update config using the following api: {config.update.name}"
         )
         args: Dict[str, Any] = {
             "client": self.client,
@@ -470,76 +469,76 @@ class SonarrConfigHandler:
         for update_modeled_config in config.update_modeled_configs:
             args["body"] = update_modeled_config
             args["id"] = self._get_config_id(config=update_modeled_config)
-            self._handle_api_call(api=config.update_api_single, api_args=args)
+            self._handle_api_call(api=config.update.api, api_args=args)
         logger.info(
-            f"Successfully updated config using the following api: {config.update_api_single_name}"
+            f"Successfully updated config using the following api: {config.update.name}"
         )
 
-    def _apply_update_config_bulk(self, config: configItem):
+    def _apply_update_config_bulk(self, config: ConfigItem):
         if not (
             config.update_modeled_configs
-            and config.update_strategy == bulk
-            and config.update_api_bulk
+            and config.update.strategy == Strategy.BULK
+            and config.update.api
         ):
             return
         logger.debug(
-            f"Attempting to update config using the following bulk api: {config.update_api_bulk_name}"
+            f"Attempting to update config using the following bulk api: {config.update.name}"
         )
         args: Dict[str, Any] = {
             "client": self.client,
             "body": config.update_modeled_configs,
         }
-        self._handle_api_call(api=config.update_api_bulk, api_args=args)
+        self._handle_api_call(api=config.update.api, api_args=args)
         logger.info(
-            f"Successfully updated config using the following bulk api: {config.update_api_bulk_name}"
+            f"Successfully updated config using the following bulk api: {config.update.name}"
         )
 
-    def _delete_and_recreate_config_single(self, config: configItem):
+    def _delete_and_recreate_config_single(self, config: ConfigItem):
         if not (
             config.update_modeled_configs
-            and config.create_strategy == single
-            and not config.update_api_single
+            and config.create.strategy == Strategy.SINGLE
+            and not config.update.api
         ):
             return
         self.delete_existing_configs(config=config)
         logger.debug(
-            f"Attempting to recreate config using the following api: {config.create_api_single_name}"
+            f"Attempting to recreate config using the following api: {config.create.name}"
         )
         args: Dict[str, Any] = {
             "client": self.client,
         }
         for update_modeled_config in config.update_modeled_configs:
             args["body"] = update_modeled_config
-            self._handle_api_call(api=config.create_api_single, api_args=args)
+            self._handle_api_call(api=config.create.api, api_args=args)
         logger.info(
-            f"Successfully recreated config using the following api: {config.create_api_single_name}"
+            f"Successfully recreated config using the following api: {config.create.name}"
         )
 
-    def _delete_and_recreate_config_bulk(self, config: configItem):
+    def _delete_and_recreate_config_bulk(self, config: ConfigItem):
         if not (
             config.update_modeled_configs
-            and config.update_strategy == bulk
-            and not config.update_api_bulk
+            and config.update.strategy == Strategy.BULK
+            and not config.update.api
         ):
             return
         self.delete_existing_configs(config=config)
         logger.debug(
-            f"Attempting to recreate config using the following bulk api: {config.create_api_bulk_name}"
+            f"Attempting to recreate config using the following bulk api: {config.create.name}"
         )
         args: Dict[str, Any] = {
             "client": self.client,
             "body": config.update_modeled_configs,
         }
-        self._handle_api_call(api=config.create_api_bulk, api_args=args)
+        self._handle_api_call(api=config.create.api, api_args=args)
         logger.info(
-            f"Successfully recreated config using the following bulk api: {config.create_api_bulk_name}"
+            f"Successfully recreated config using the following bulk api: {config.create.name}"
         )
 
-    def apply_config(self, config: configItem):
+    def apply_config(self, config: ConfigItem):
         # break out early if there's no config to apply
         if not config.update_modeled_configs and not config.new_modeled_configs:
             logger.info(
-                f"No existing configs to update or new configs to apply for: {config.model_name} skipping.."
+                f"No existing configs to update or new configs to apply for: {config.model.name} skipping.."
             )
             return
 
@@ -549,13 +548,13 @@ class SonarrConfigHandler:
             self._apply_new_config_bulk(config=config)
         else:
             logger.info(
-                f"No new configs to apply for: {config.model_name} continuing.."
+                f"No new configs to apply for: {config.model.name} continuing.."
             )
 
         # break out early if there's no diff between derived and update config
         if config.update_modeled_configs == config.derived_modeled_configs:
             logger.info(
-                f"No diff between existing configs and update configs: {config.model_name} skipping.."
+                f"No diff between existing configs and update configs: {config.model.name} skipping.."
             )
             return
 
@@ -568,24 +567,26 @@ class SonarrConfigHandler:
             self._apply_update_config_single(config=config)
             self._apply_update_config_bulk(config=config)
         else:
-            logger.info(f"No configs to update for: {config.model_name} skipping..")
+            logger.info(f"No configs to update for: {config.model.name} skipping..")
 
-    def _merge_desired_configs_with_schema(self, config: configItem):
+    def _merge_desired_configs_with_schema(self, config: ConfigItem):
         if not config.schemas:
             return
 
         merged = []
         for raw_desired_config in config.desired_raw_configs:
             # convert to config map as there can be multiple versions for the schema
+            schema_merge_key_lower = config.schema_merge_key.name.lower()
+
             raw_desired_config_map = self._convert_to_raw_config_map(
                 configs=self._convert_to_list(raw_desired_config),
-                primary_key=config.schema_merge_key,
+                primary_key=schema_merge_key_lower,
             )
 
             resolved_schema_merge_key = raw_desired_config.get(
-                config.schema_merge_key, config.schema_merge_key
+                schema_merge_key_lower,
+                schema_merge_key_lower,
             )
-
             merged_raw_config = self._recursive_merge_dicts(
                 original_dict=config.raw_schema_map[resolved_schema_merge_key],
                 new_dict=raw_desired_config_map[resolved_schema_merge_key],
@@ -596,7 +597,7 @@ class SonarrConfigHandler:
         config.desired_raw_configs = merged
 
     def fetch_and_prepare_config(
-        self, config: configItem, desired_user_configs, derived_only: bool = False
+        self, config: ConfigItem, desired_user_configs, derived_only: bool = False
     ):
         # derived configs
         config.derived_modeled_configs = self.get_derived_config(config=config)
@@ -620,37 +621,36 @@ class SonarrConfigHandler:
             return
 
         # config schema
-        if config.get_api_schema:
-            pre_config_schema = self._handle_api_call(api=config.get_api_schema)
+        if config.get_schema:
+            pre_config_schema = self._handle_api_call(api=config.get_schema.api)
             config.schemas = self._convert_to_list(pre_config_schema)
 
             config.raw_schemas = self._convert_to_raw_configs(config.schemas)
             config.raw_schema_map = self._convert_to_raw_config_map(
                 configs=config.raw_schemas,
-                primary_key=config.schema_merge_key,
+                primary_key=config.schema_merge_key.name.lower(),
             )
 
         # format with config schema, if it exists
         self._merge_desired_configs_with_schema(config=config)
 
-        breakpoint()
-
         # config maps
+        merge_key_lower = config.merge_key.name.lower()
         config.derived_raw_config_map = self._convert_to_raw_config_map(
             configs=config.derived_raw_configs,
-            primary_key=config.merge_key,
+            primary_key=merge_key_lower,
         )
         logger.debug(f"Derived Raw Config Map: {config.derived_raw_config_map}")
 
         config.desired_raw_config_map = self._convert_to_raw_config_map(
             configs=config.desired_raw_configs,
-            primary_key=config.merge_key,
+            primary_key=merge_key_lower,
         )
         logger.debug(f"Desired Raw Config Map: {config.desired_raw_config_map}")
 
     def handle_config_base(
         self,
-        config: configItem,
+        config: ConfigItem,
         desired_user_configs: Dict,
     ):
         self.fetch_and_prepare_config(
@@ -662,13 +662,13 @@ class SonarrConfigHandler:
         if self.retrieve_config:
             derived_raw_configs = {config.config_name: config.derived_raw_configs}
             logger.info(
-                f"Retrieved config for: {config.model_name}\n{yaml.dump(derived_raw_configs, indent=4)}"
+                f"Retrieved config for: {config.model.name}\n{yaml.dump(derived_raw_configs, indent=4)}"
             )
             return
 
         if not config.desired_raw_configs:
             logger.info(
-                f"No desired config for {config.model_name} config to handle, continuing.. "
+                f"No desired config for {config.model.name} config to handle, continuing.. "
             )
             return
 
@@ -679,5 +679,6 @@ class SonarrConfigHandler:
     def apply(self, desired_user_configs):
         for config in configs:
             self.handle_config_base(
-                config=config, desired_user_configs=desired_user_configs
+                config=config,
+                desired_user_configs=desired_user_configs,
             )
