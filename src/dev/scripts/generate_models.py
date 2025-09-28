@@ -1,6 +1,6 @@
 import subprocess
 import requests
-from dev.utils.constants import (
+from utils.constants import (
     SONARR_SCHEMA_URL,
     SONARR_SCHEMA_PATH,
     CLIENT_OUTPUT_DIR,
