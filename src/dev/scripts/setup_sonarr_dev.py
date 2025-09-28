@@ -4,7 +4,7 @@ import string
 from pathlib import Path
 from xml.etree.ElementTree import Element, SubElement, tostring
 from xml.dom import minidom
-from utils.constants import (
+from constants import (
     SONARR_DEV_CONFIG_DIR,
     SONARR_DEV_DATA_DIR,
     SONARR_DEV_CONFIG_PATH,
