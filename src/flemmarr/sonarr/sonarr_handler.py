@@ -4,6 +4,7 @@ from urllib3.util import Retry
 import yaml
 
 from flemmarr.logger import setup_logging
+from flemmarr.utils.performance import profile
 from flemmarr.utils.enum import Strategy
 from flemmarr.utils.constants import api_key_path_suffix
 from utils.models.config import ConfigItem
@@ -36,6 +37,85 @@ class SonarrConfigHandler:
         self.r.mount("http://", adapter)
         self.r.mount("https://", adapter)
 
+    # bool static methods
+    @staticmethod
+    def _is_successful_http_response(e: UnexpectedStatus) -> bool:
+        return e.status_code in range(200, 301)
+
+    @staticmethod
+    def _is_list_of_dicts(item: Any) -> bool:
+        """
+        Checks if an item is a list containing only dictionaries.
+
+        Args:
+            item: The item to check.
+
+        Returns:
+            bool: True if the item is a list of dictionaries, False otherwise.
+        """
+        if not isinstance(item, list):
+            return False  # Not a list
+        if not all(isinstance(element, dict) for element in item):
+            return False  # Not all elements are dictionaries
+        return True
+
+    # conversion static methods
+    @staticmethod
+    def _convert_to_list(x: Union[Any, List]):
+        # Check if list
+        if not isinstance(x, list):
+            x = [x]
+
+        return x
+
+    @staticmethod
+    def _convert_to_raw_config_map(
+        configs: List[Dict],
+        primary_key: str,
+        secondary_level: str = "",
+    ):
+        """
+        Creates map of key to dictionary from list of dicts
+        for key based searching on a list of dicts
+        """
+
+        raw_config_map = {}
+        for config in configs:
+            key = primary_key
+            if primary_key in config and config[primary_key]:
+                key = config[primary_key]
+
+            elif (
+                secondary_level in config
+                and primary_key in config[secondary_level]
+                and config[secondary_level][primary_key]
+            ):
+                key = config[secondary_level][primary_key]
+            raw_config_map[key] = config
+
+        return raw_config_map
+
+    @staticmethod
+    def _convert_to_raw_config(config):
+        """
+        Converts list of OpenAPI objects to list of dicts
+        """
+        return config.to_dict()
+
+    @staticmethod
+    def _convert_to_modeled_config(model: Any, config: Any) -> Any:
+        """
+        Converts OpenAPI dict to object
+        """
+        return model().from_dict(config)
+
+    # other static methods
+    @staticmethod
+    def _get_config_id(config):
+        id = getattr(config, "id", None)
+        logger.debug(f"Retrieved the following ID: {id}")
+        return id
+
     def _url(self):
         address = (
             self.address
@@ -43,9 +123,6 @@ class SonarrConfigHandler:
             else "http://" + self.address
         )
         return "{}:{}".format(address, self.port)
-
-    def _is_successful_http_response(self, e: UnexpectedStatus):
-        return e.status_code in range(200, 301)
 
     def _auto_retrieve_api_key(self):
         logger.debug("Attempting to auto retrieve API key.")
@@ -88,57 +165,11 @@ class SonarrConfigHandler:
     def _get_api_info(self):
         self._handle_api_call(api=get_api_info)
 
-    def _convert_to_list(self, x: Union[Any, List]):
-        # Check if list
-        if not isinstance(x, list):
-            x = [x]
-
-        return x
-
-    def _convert_to_raw_config_map(
-        self,
-        configs: List[Dict],
-        primary_key: str,
-        secondary_level: str = "",
-    ):
-        """
-        Creates map of key to dictionary from list of dicts
-        for key based searching on a list of dicts
-        """
-
-        raw_config_map = {}
-        for config in configs:
-            key = primary_key
-            if primary_key in config and config[primary_key]:
-                key = config[primary_key]
-
-            elif (
-                secondary_level in config
-                and primary_key in config[secondary_level]
-                and config[secondary_level][primary_key]
-            ):
-                key = config[secondary_level][primary_key]
-            raw_config_map[key] = config
-
-        return raw_config_map
-
-    def _convert_to_raw_config(self, config):
-        """
-        Converts list of OpenAPI objects to list of dicts
-        """
-        return config.to_dict()
-
     def _convert_to_raw_configs(self, configs):
         """
         Converts list of OpenAPI objects to list of dicts
         """
         return [self._convert_to_raw_config(config) for config in configs]
-
-    def _convert_to_modeled_config(self, model: Any, config: Any) -> Any:
-        """
-        Converts OpenAPI dict to object
-        """
-        return model().from_dict(config)
 
     def _convert_to_modeled_configs(
         self, model: Any, configs: Union[Any, List[Any]]
@@ -180,22 +211,6 @@ class SonarrConfigHandler:
                 new_result[key] = new_value
 
         return merged_result, new_result
-
-    def _is_list_of_dicts(self, item):
-        """
-        Checks if an item is a list containing only dictionaries.
-
-        Args:
-            item: The item to check.
-
-        Returns:
-            bool: True if the item is a list of dictionaries, False otherwise.
-        """
-        if not isinstance(item, list):
-            return False  # Not a list
-        if not all(isinstance(element, dict) for element in item):
-            return False  # Not all elements are dictionaries
-        return True
 
     def _recurse_merge_handle_list_of_dicts(self, original_configs, new_configs):
         if not self._is_list_of_dicts(new_configs):
@@ -292,11 +307,6 @@ class SonarrConfigHandler:
                 new_config_map=config.desired_raw_config_map,
             )
         )
-
-    def _get_config_id(self, config):
-        id = getattr(config, "id", None)
-        logger.debug(f"Retrieved the following ID: {id}")
-        return id
 
     def _get_config_ids(self, configs):
         return [self._get_config_id(config=config) for config in configs]
@@ -648,6 +658,7 @@ class SonarrConfigHandler:
         )
         logger.debug(f"Desired Raw Config Map: {config.desired_raw_config_map}")
 
+    @profile
     def handle_config_base(
         self,
         config: ConfigItem,
@@ -676,6 +687,7 @@ class SonarrConfigHandler:
 
         self.apply_config(config=config)
 
+    @profile
     def apply(self, desired_user_configs):
         for config in configs:
             self.handle_config_base(
