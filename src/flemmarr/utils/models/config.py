@@ -20,9 +20,9 @@ class ConfigItem:
     model: OpenApiModelResource = field(default_factory=OpenApiModelResource)
 
     # optional user input for strategies and merge key
-    merge_strategy: Strategy = Strategy.DEFAULT
-    merge_key: MergeKey = MergeKey.DEFAULT
-    schema_merge_key: MergeKey = MergeKey.DEFAULT
+    merge_strategy: Strategy = Strategy.NONE
+    merge_key: MergeKey = MergeKey.NONE
+    schema_merge_key: MergeKey = MergeKey.NONE
 
     # attributes for storage
     schemas: List = field(default_factory=list)
@@ -64,7 +64,7 @@ class ConfigItem:
             if self.merge_strategy == Strategy.BULK and not self.merge_key.value:
                 self.merge_key = MergeKey.NAME if model_has_name else MergeKey.TITLE
             else:
-                self.merge_key = MergeKey.NONE
+                self.merge_key = MergeKey.SINGLE_ITEM
 
         # sometimes we have multiple schemas so we need a key to merge with
         if not self.schema_merge_key.value:
@@ -72,7 +72,9 @@ class ConfigItem:
                 self.model.resource, MergeKey.IMPLEMENTATION.name.lower()
             )
             self.schema_merge_key = (
-                MergeKey.IMPLEMENTATION if model_has_implementation else MergeKey.NONE
+                MergeKey.IMPLEMENTATION
+                if model_has_implementation
+                else MergeKey.SINGLE_ITEM
             )
 
     def __post_init__(self):

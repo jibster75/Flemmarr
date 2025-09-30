@@ -144,4 +144,3 @@ configs = [
 
 for config in configs:
     logger.debug(f"{config}")
-breakpoint()
