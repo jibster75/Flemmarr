@@ -1,12 +1,15 @@
 import yaml
 import os
 from flemmarr.logger import setup_logging
+from flemmarr.utils.performance import profile
+
 from sonarr.sonarr_handler import SonarrConfigHandler
 
 logger = setup_logging(__name__)
 logger.debug(f"Logger initialized for {__name__} module")
 
 
+@profile
 def main():
     # Check if we're in retrieve config mode
     retrieve_config = bool(os.getenv("FLEMMARR_RETRIEVE_CONFIG", False))
