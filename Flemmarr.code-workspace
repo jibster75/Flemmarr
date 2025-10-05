@@ -1,22 +1,13 @@
 {
 	"folders": [
 		{
+			"path": "./src",
+			"name": "src"
+		},
+		{
 			"path": "./config",
 			"name": "Flemmarr Configs"
 		},
-		{
-			"path": "./src/flemmarr",
-			"name": "Flemmarr"
-		},
-		{
-			"path": "./src/flemmarr/clients",
-			"name": "Open API Clients"
-		},
-		{
-			"path": "./src/dev",
-			"name": "Dev Tools"
-		},
-
 		{
 			"path": ".",
 			"name": "Project Root"
