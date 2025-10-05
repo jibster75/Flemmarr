@@ -3,7 +3,7 @@ import os
 from flemmarr.logger import setup_logging
 from flemmarr.utils.performance import profile
 
-from sonarr.sonarr_handler import SonarrConfigHandler
+from flemmarr.sonarr.sonarr_handler import SonarrConfigHandler
 
 logger = setup_logging(__name__)
 logger.debug(f"Logger initialized for {__name__} module")

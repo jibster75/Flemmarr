@@ -13,13 +13,13 @@ generate_models:
 	poetry run python src/dev/scripts/generate_models.py
 
 run:
-	poetry run python src/flemmarr/main.py
+	poetry run python -m flemmarr
 
 run_retrieve_config:
-	FLEMMARR_RETRIEVE_CONFIG="TRUE" poetry run python src/flemmarr/main.py
+	FLEMMARR_RETRIEVE_CONFIG="TRUE" poetry run python -m flemmarr
 
 run_debug:
-	FLEMMARR_LOG_LEVEL="DEBUG" poetry run python src/flemmarr/main.py
+	FLEMMARR_LOG_LEVEL="DEBUG" poetry run python -m flemmarr
 
 format:
 	poetry run black src/flemmarr

@@ -1,5 +1,5 @@
 from flemmarr.logger import setup_logging
-from utils.models.config import ConfigItem
+from flemmarr.utils.models.config import ConfigItem
 
 from flemmarr.utils.models.general import OpenApiModelResource, OpenApiModuleResource
 

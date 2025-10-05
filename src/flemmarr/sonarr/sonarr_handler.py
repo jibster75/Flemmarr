@@ -7,7 +7,7 @@ from flemmarr.logger import setup_logging
 from flemmarr.utils.performance import profile
 from flemmarr.utils.enum import Strategy
 from flemmarr.utils.constants import api_key_path_suffix
-from utils.models.config import ConfigItem
+from flemmarr.utils.models.config import ConfigItem
 
 from flemmarr.sonarr.sonarr_config_map import configs
 
