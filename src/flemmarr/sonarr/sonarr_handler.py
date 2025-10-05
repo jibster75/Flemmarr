@@ -671,10 +671,10 @@ class SonarrConfigHandler:
 
         if self.retrieve_config:
             derived_raw_configs = {config.config_name: config.derived_raw_configs}
-            logger.info(
+            logger.debug(
                 f"Retrieved config for: {config.model.name}\n{yaml.dump(derived_raw_configs, indent=4)}"
             )
-            return
+            return derived_raw_configs
 
         if not config.desired_raw_configs:
             logger.info(
@@ -688,8 +688,12 @@ class SonarrConfigHandler:
 
     @profile
     def apply(self, desired_user_configs):
+        retrieved_configs = {}
         for config in configs:
-            self.handle_config_base(
+            retrieved_config = self.handle_config_base(
                 config=config,
                 desired_user_configs=desired_user_configs,
             )
+            if retrieved_config:
+                retrieved_configs.update(retrieved_config)
+        return retrieved_configs
