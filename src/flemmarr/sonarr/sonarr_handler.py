@@ -1,4 +1,5 @@
-import requests
+from requests import Session
+from requests.adapters import HTTPAdapter
 from typing import Any, Union, Dict, List
 from urllib3.util import Retry
 import yaml
@@ -29,11 +30,9 @@ class SonarrConfigHandler:
         self.apiKey = apiKey
         self.api_key_path_suffix = api_key_path_suffix
 
-        adapter = requests.adapters.HTTPAdapter(
-            max_retries=Retry(total=10, backoff_factor=0.1)
-        )
+        adapter = HTTPAdapter(max_retries=Retry(total=10, backoff_factor=0.1))
 
-        self.r = requests.Session()
+        self.r = Session()
         self.r.mount("http://", adapter)
         self.r.mount("https://", adapter)
 
