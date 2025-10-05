@@ -12,6 +12,7 @@ dependencies = [
     "requests (>=2.32.4)",
     "urllib3 (>=2.5.0)",
     "psutil (>=7.1.0)",
+    "pyyaml (>=6.0.3,<7.0.0)",
 ]
 packages = [{ include = "flemmarr", from = "src" }, { include = "dev" }]
 
