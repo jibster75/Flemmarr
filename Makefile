@@ -39,7 +39,7 @@ sabnzbd_docker_down:
 
 dev_up:
 	$(MAKE) install
-	poetry run python src/dev/scripts/setup_sonarr_dev.py
+	poetry run python src/dev/scripts/create_docker_compose.py
 	$(MAKE) sonarr_docker_up
 	$(MAKE) sabnzbd_docker_up
 
