@@ -14,7 +14,7 @@ sonarr = DockerComposeConfig(
 )
 sonarr.volumes = [
     {sonarr.local_config_dir: [Dir.CONFIG.value]},
-    {sonarr.local_data_dir: [Dir.TV.value, Dir.DOWNLOADS.value]},
+    {sonarr.local_data_dir: [Dir.DATA.value]},
 ]
 
 sonarr.exposed_ports = [App.SONARR.port]
@@ -26,8 +26,8 @@ sabnzbd = DockerComposeConfig(
     image="linuxserver/sabnzbd",
 )
 sabnzbd.volumes = [
-    {sonarr.local_config_dir: [Dir.CONFIG.value]},
-    {sonarr.local_data_dir: [Dir.DATA.value]},
+    {sabnzbd.local_config_dir: [Dir.CONFIG.value]},
+    {sabnzbd.local_data_dir: [Dir.DATA.value]},
 ]
 
 sabnzbd.exposed_ports = [App.SABNZBD.port]
