@@ -19,4 +19,20 @@ sonarr.volumes = [
 
 sonarr.exposed_ports = [App.SONARR.port]
 
-configs = [sonarr]
+
+sabnzbd = DockerComposeConfig(
+    app=App.SABNZBD,
+    gen_api_key=True,
+    image="linuxserver/sabnzbd",
+)
+sabnzbd.volumes = [
+    {sonarr.local_config_dir: [Dir.CONFIG.value]},
+    {sonarr.local_data_dir: [Dir.DATA.value]},
+]
+
+sabnzbd.exposed_ports = [App.SABNZBD.port]
+
+configs = [
+    sonarr,
+    sabnzbd,
+]

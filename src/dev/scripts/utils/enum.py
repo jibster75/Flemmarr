@@ -17,11 +17,13 @@ class FilePath(StrEnum):
 class Port(Enum):
     SONARR_WEB = 8989
     SONARR_HTTPS = 9898
+    SABNZBD_WEB = 8080
 
 
 class App(StrEnum):
     NONE = auto()
     SONARR = auto()
+    SABNZBD = auto()
 
     def __init__(
         self,
