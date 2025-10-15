@@ -33,12 +33,10 @@ def write_config_xml(output_path: Path, xml_config: ArrXmlConfig):
     print(f"✅ Wrote formatted config.xml to: {output_path}")
 
 
-def setup_directories(config_dir, data_dir):
-    config_dir.mkdir(parents=True, exist_ok=True)
-    data_dir.mkdir(parents=True, exist_ok=True)
-
-    print(f"📁 Created config directory at: {config_dir}")
-    print(f"📁 Created data directory at: {data_dir}")
+def setup_directories(dirs: List[Path] = []):
+    for dir in dirs:
+        dir.mkdir(parents=True, exist_ok=True)
+        print(f"📁 Created {dir.name} directory at: {dir}")
 
 
 def write_docker_compose_file(
@@ -80,8 +78,7 @@ def write_docker_compose_file(
 if __name__ == "__main__":
     for config in configs:
         setup_directories(
-            config_dir=config.local_config_dir,
-            data_dir=config.local_data_dir,
+            dirs=[path for volume in config.volumes for path in list(volume.keys())],
         )
         write_config_xml(
             output_path=config.local_xml_output,

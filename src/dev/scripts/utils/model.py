@@ -46,6 +46,7 @@ class DockerComposeConfig:
     app: InitVar[Optional[App]] = field(default=App.NONE)
 
     app_name: Optional[str] = field(default=None)
+    app_volumes_dir: Path = field(default=Path())
     local_config_dir: Path = field(default=Path())
     local_data_dir: Path = field(default=Path())
     output_path: Path = field(default=Path())
@@ -59,17 +60,22 @@ class DockerComposeConfig:
         self.app_name = self.app_name if self.app_name else app.value
 
         volumes_dir: Path = DEV_DOCKER_DIR / Dir.VOLUMES.value
-        app_volumes_dir: Path = volumes_dir / app.value
+
+        self.app_volumes_dir = (
+            self.app_volumes_dir
+            if self.app_volumes_dir.name
+            else volumes_dir / app.value
+        )
 
         self.local_config_dir = (
             self.local_config_dir
             if self.local_config_dir.name
-            else app_volumes_dir / Dir.CONFIG.value
+            else self.app_volumes_dir / Dir.CONFIG.value
         )
         self.local_data_dir = (
             self.local_data_dir
             if self.local_data_dir.name
-            else app_volumes_dir / Dir.DATA.value
+            else self.app_volumes_dir / Dir.DATA.value
         )
         self.output_path = (
             self.output_path

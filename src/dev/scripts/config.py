@@ -15,6 +15,7 @@ sonarr = DockerComposeConfig(
 sonarr.volumes = [
     {sonarr.local_config_dir: [Dir.CONFIG.value]},
     {sonarr.local_data_dir: [Dir.DATA.value]},
+    {sonarr.app_volumes_dir / Dir.TV: []},
 ]
 
 sonarr.exposed_ports = [App.SONARR.port]
