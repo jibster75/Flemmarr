@@ -10,7 +10,7 @@ from flemmarr.utils.enum import Strategy
 from flemmarr.utils.constants import api_key_path_suffix
 from flemmarr.utils.models.config import ConfigItem
 
-from flemmarr.sonarr.sonarr_config_map import configs
+from flemmarr.sonarr.sonarr_config_map import configs as sonarr_configs
 
 from flemmarr.clients.sonarr_client import AuthenticatedClient
 from flemmarr.clients.sonarr_client.types import UNSET
@@ -163,6 +163,27 @@ class SonarrConfigHandler:
 
     def _get_api_info(self):
         self._handle_api_call(api=get_api_info)
+
+    @staticmethod
+    def _get_dict_value(d: Dict, key: str):
+        """
+        Safely retrieve dict key and handle dicts that may contain different cases for keys
+        """
+        upper_key = key.upper()
+        lower_key = key.lower()
+        title_key = key.title()
+
+        d_keys = d.keys()
+
+        retrieve_key = (
+            lower_key
+            if lower_key in d_keys
+            else title_key
+            if title_key in d_keys
+            else upper_key
+        )
+
+        return d.get(retrieve_key)
 
     def _convert_to_raw_configs(self, configs):
         """
@@ -382,18 +403,19 @@ class SonarrConfigHandler:
         """
         desired_raw_configs = []
 
-        # config names
-        config_name = config.config_name.lower()
-        root_config_name = config.root_config_name.lower()
-
         # get root config, if it exists
-        root_raw_config = desired_user_configs.get(root_config_name)
+        root_raw_config = self._get_dict_value(
+            desired_user_configs, config.root_config_name
+        )
 
         if root_raw_config:
-            desired_raw_configs = root_raw_config.get(config_name)
+            desired_raw_configs = self._get_dict_value(
+                root_raw_config, config.config_name
+            )
         else:
-            desired_raw_configs = desired_user_configs.get(config_name)
-
+            desired_raw_configs = self._get_dict_value(
+                desired_user_configs, config.config_name
+            )
         return self._convert_to_list(desired_raw_configs) if desired_raw_configs else []
 
     def get_derived_config(self, config: ConfigItem) -> List[Any]:
@@ -563,7 +585,7 @@ class SonarrConfigHandler:
         # break out early if there's no diff between derived and update config
         if config.update_modeled_configs == config.derived_modeled_configs:
             logger.info(
-                f"No diff between existing configs and update configs: {config.model.name} skipping.."
+                f"No existing configs to update for: {config.model.name} skipping.."
             )
             return
 
@@ -689,7 +711,7 @@ class SonarrConfigHandler:
     @profile
     def apply(self, desired_user_configs):
         retrieved_configs = {}
-        for config in configs:
+        for config in sonarr_configs:
             retrieved_config = self.handle_config_base(
                 config=config,
                 desired_user_configs=desired_user_configs,
