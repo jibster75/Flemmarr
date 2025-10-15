@@ -30,7 +30,7 @@ def setup_logging(name="flemmarr") -> logging.Logger:
 
         # Define how log messages will appear
         formatter = logging.Formatter(
-            fmt="[%(asctime)s] [%(levelname)s] [%(name)s] [%(funcName)25s()]: %(message)s",
+            fmt="[%(asctime)s] [%(levelname)s] [%(name)s] [%(funcName)s()]: %(message)s",
             datefmt="%Y-%m-%d %H:%M:%S",
         )
 
