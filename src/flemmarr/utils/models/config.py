@@ -54,12 +54,12 @@ class ConfigItem:
         # resolve config merge strategy based off get strategy unless overriden
         self.merge_strategy = (
             self.get.strategy
-            if self.get.strategy and not self.merge_strategy.value
+            if self.get.strategy and self.merge_strategy is Strategy.NONE
             else self.merge_strategy
         )
 
         # resolve config merge key unless overriden
-        if not self.merge_key.value:
+        if self.merge_key is MergeKey.NONE:
             model_has_name = hasattr(self.model, MergeKey.NAME.name.lower())
             if self.merge_strategy == Strategy.BULK and not self.merge_key.value:
                 self.merge_key = MergeKey.NAME if model_has_name else MergeKey.TITLE
@@ -67,7 +67,7 @@ class ConfigItem:
                 self.merge_key = MergeKey.SINGLE_ITEM
 
         # sometimes we have multiple schemas so we need a key to merge with
-        if not self.schema_merge_key.value:
+        if self.schema_merge_key is MergeKey.NONE:
             model_has_implementation = hasattr(
                 self.model.resource, MergeKey.IMPLEMENTATION.name.lower()
             )
